@@ -1,63 +1,59 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <title>chat</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 body {
   background: url("https://i.postimg.cc/gktF3bZr/Copilot-20250930-144314.png") no-repeat center center fixed;
   background-size: cover;
 }
-h1,h2 { text-align:center; text-shadow:0 0 8px #0f0; }
-input,textarea,button,select {
-  margin:6px; padding:10px; background:#001100; color:#0f0;
-  border:1px solid #0f0; border-radius:6px;
+h1,h2{text-align:center;text-shadow:0 0 8px #0f0}
+input,textarea,button,select{
+  margin:6px;padding:10px;background:#001100;color:#0f0;
+  border:1px solid #0f0;border-radius:6px
 }
-button.spyBtn {
-  min-width:160px; padding:12px 20px;
-  background:#001100; color:#0f0;
-  border:2px solid #0f0; border-radius:8px;
-  cursor:pointer;
+button.spyBtn{
+  min-width:160px;padding:12px 20px;background:#001100;
+  color:#0f0;border:2px solid #0f0;border-radius:8px;cursor:pointer
 }
-button.spyBtn:hover { background:#0f0; color:#000; }
-.row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
-.hidden { display:none; }
-.message { border-bottom:1px dashed #0f0; padding:8px; }
-img { max-width:100%; margin-top:6px; border:1px solid #0f0; }
-#messagesPanel { max-height:65vh; overflow-y:auto; padding:10px; border:1px solid #0f0; }
-small.muted { color:#8f8; }
+button.spyBtn:hover{background:#0f0;color:#000}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hidden{display:none}
+.message{border-bottom:1px dashed #0f0;padding:8px}
+img{max-width:100%;margin-top:6px;border:1px solid #0f0}
+#messagesPanel{max-height:65vh;overflow:auto;padding:10px;border:1px solid #0f0}
+small.muted{color:#8f8}
 </style>
 </head>
 
 <body>
-<h1>🕵️ Espion chat</h1>
+<h1>🕵️ Espion Supabase</h1>
 
-<!-- Choix rôle -->
+<!-- Choix -->
 <div id="choicePanel" class="row">
   <button class="spyBtn" id="btnChooseAdmin">🔐 Admin</button>
   <button class="spyBtn" id="btnChooseUser">👤 Utilisateur</button>
 </div>
 
-<!-- Connexion -->
+<!-- Login -->
 <div id="loginPanel" class="hidden">
-  <h2 id="loginTitle">Connexion</h2>
-  <div class="row">
-    <input id="loginId" placeholder="Identifiant">
-    <input id="loginPwd" type="password" placeholder="Mot de passe">
-  </div>
+  <h2 id="loginTitle"></h2>
+  <input id="loginId" placeholder="Identifiant">
+  <input id="loginPwd" type="password" placeholder="Mot de passe">
   <p id="captchaQuestion"></p>
-  <input id="captchaAnswer" placeholder="Réponse CAPTCHA">
-  <button class="spyBtn" id="btnLogin">Se connecter</button>
+  <input id="captchaAnswer" placeholder="CAPTCHA">
+  <button class="spyBtn" id="btnLogin">Connexion</button>
   <p id="loginError"></p>
-  <div class="row"><button class="spyBtn" id="btnBackLogin">⬅ Retour</button></div>
+  <button class="spyBtn" id="btnBackLogin">⬅ Retour</button>
 </div>
 
 <!-- Portail -->
 <div id="portalPanel" class="hidden">
   <h2>Centre de contrôle</h2>
-  <p style="text-align:center;">
+  <p style="text-align:center">
     Bienvenue <span id="userName"></span>
     <small id="userRole" class="muted"></small>
   </p>
@@ -71,43 +67,48 @@ small.muted { color:#8f8; }
 
 <!-- Messages -->
 <div id="messagesPanel" class="hidden">
-  <h2>📥 Messages globaux</h2>
+  <h2>📥 Messages</h2>
   <div id="messages"></div>
-  <div class="row"><button class="spyBtn btnBack">⬅ Retour</button></div>
+  <button class="spyBtn btnBack">⬅ Retour</button>
 </div>
 
-<!-- Gestion comptes -->
+<!-- Gestion -->
 <div id="gestionPanel" class="hidden">
   <h2>🔐 Gestion des comptes</h2>
-  <div class="row">
-    <input id="newId" placeholder="Identifiant">
-    <input id="newPwd" placeholder="Mot de passe">
-    <select id="newRole">
-      <option value="user">Utilisateur</option>
-      <option value="admin">Admin</option>
-    </select>
-    <button class="spyBtn" id="btnCreate">Créer</button>
-  </div>
 
-  <div class="row">
-    <select id="accountList"></select>
-    <button class="spyBtn" id="btnVoirInfos">👁 Voir ID / MDP</button>
-    <button class="spyBtn" id="btnDelete">Supprimer</button>
-    <button class="spyBtn" id="btnBlock">Bloquer</button>
-  </div>
+  <input id="newId" placeholder="Identifiant">
+  <input id="newPwd" placeholder="Mot de passe">
+  <select id="newRole">
+    <option value="user">Utilisateur</option>
+    <option value="admin">Admin</option>
+  </select>
+  <button class="spyBtn" id="btnCreate">Créer</button>
 
-  <div class="row"><button class="spyBtn btnBack">⬅ Retour</button></div>
+  <hr>
+
+  <select id="accountList" size="6" style="min-width:220px"></select>
+  <br>
+  <button class="spyBtn" id="btnVoir">👁 Voir ID/MDP</button>
+  <button class="spyBtn" id="btnBlock">Bloquer / Débloquer</button>
+  <button class="spyBtn" id="btnDelete">Supprimer</button>
+
+  <br>
+  <button class="spyBtn btnBack">⬅ Retour</button>
 </div>
 
 <!-- Envoi -->
 <div id="envoiPanel" class="hidden">
   <h2>📤 Envoyer</h2>
-  <textarea id="msgText" rows="4" placeholder="Message..."></textarea>
+  <textarea id="msgText" rows="4" placeholder="Message"></textarea>
+
+  <div id="destList" style="border:1px solid #0f0;padding:8px;max-height:150px;overflow:auto"></div>
+
   <input type="file" id="imageInput" accept="image/*">
   <img id="preview" style="display:none">
+
   <button class="spyBtn" id="btnSend">Envoyer</button>
   <p id="sendStatus"></p>
-  <div class="row"><button class="spyBtn btnBack">⬅ Retour</button></div>
+  <button class="spyBtn btnBack">⬅ Retour</button>
 </div>
 
 <script type="module">
@@ -118,116 +119,134 @@ const supabase = createClient(
   "sb_publishable_6jCj8B1gHh5v6teJe-zy0g_rf1ijiYJ"
 );
 
-const el = id => document.getElementById(id);
-const show = id => {
-  ["choicePanel","loginPanel","portalPanel","messagesPanel","gestionPanel","envoiPanel"]
-  .forEach(p=>el(p).classList.add("hidden"));
-  el(id).classList.remove("hidden");
+const el=id=>document.getElementById(id);
+const show=id=>{
+ ["choicePanel","loginPanel","portalPanel","messagesPanel","gestionPanel","envoiPanel"]
+ .forEach(p=>el(p).classList.add("hidden"));
+ el(id).classList.remove("hidden");
 };
 
-let currentUser=null, currentRole=null, roleChoice=null;
-let a,b;
+let user=null, role=null, roleChoice=null, a=0,b=0;
 
-function newCaptcha(){
-  a=Math.floor(Math.random()*10)+1;
-  b=Math.floor(Math.random()*10)+1;
-  el("captchaQuestion").textContent=`${a} + ${b} = ?`;
+function captcha(){
+ a=Math.floor(Math.random()*10)+1;
+ b=Math.floor(Math.random()*10)+1;
+ el("captchaQuestion").textContent=`${a} + ${b} = ?`;
 }
 
-el("btnChooseAdmin").onclick=()=>{roleChoice="admin";newCaptcha();show("loginPanel");};
-el("btnChooseUser").onclick=()=>{roleChoice="user";newCaptcha();show("loginPanel");};
+el("btnChooseAdmin").onclick=()=>{roleChoice="admin";el("loginTitle").textContent="Connexion Admin";captcha();show("loginPanel")};
+el("btnChooseUser").onclick=()=>{roleChoice="user";el("loginTitle").textContent="Connexion User";captcha();show("loginPanel")};
 el("btnBackLogin").onclick=()=>show("choicePanel");
 
 el("btnLogin").onclick=async()=>{
-  if(parseInt(el("captchaAnswer").value)!==a+b) return newCaptcha();
+ if(parseInt(el("captchaAnswer").value)!==(a+b)) return captcha();
 
-  const {data}=await supabase.from("comptes")
-    .select("*")
-    .eq("identifiant",el("loginId").value)
-    .eq("motdepasse",el("loginPwd").value)
-    .eq("bloque",false)
-    .single();
+ const {data,error}=await supabase.from("comptes")
+ .select("*")
+ .eq("identifiant",el("loginId").value)
+ .eq("motdepasse",el("loginPwd").value)
+ .eq("bloque",false)
+ .single();
 
-  if(!data|| (roleChoice==="admin"&&data.role!=="admin")){
-    el("loginError").textContent="Accès refusé";
-    return;
-  }
+ if(error||!data|| (roleChoice==="admin"&&data.role!=="admin")){
+   el("loginError").textContent="Accès refusé";
+   return;
+ }
 
-  currentUser=data.identifiant;
-  currentRole=data.role;
-  el("userName").textContent=currentUser;
-  el("userRole").textContent=`(${currentRole})`;
-  show("portalPanel");
+ user=data.identifiant;
+ role=data.role;
+ el("userName").textContent=user;
+ el("userRole").textContent=`(${role})`;
+ show("portalPanel");
 };
 
-el("btnLogout").onclick=()=>{currentUser=null;show("choicePanel");};
+el("btnLogout").onclick=()=>{user=null;role=null;show("choicePanel")};
 
 el("btnMessages").onclick=async()=>{
-  show("messagesPanel");
-  el("messages").innerHTML="";
-  const {data}=await supabase.from("messages").select("*").order("created_at",{ascending:false});
-  data.forEach(m=>{
-    const d=document.createElement("div");
-    d.className="message";
-    d.innerHTML=`<b>${m.auteur}</b>: ${m.texte}`;
-    if(m.image){const i=document.createElement("img");i.src=m.image;d.appendChild(i);}
-    el("messages").appendChild(d);
-  });
-};
-
-el("btnSend").onclick=async()=>{
-  await supabase.from("messages").insert({
-    auteur:currentUser,
-    texte:el("msgText").value,
-    image:el("preview").src||null
-  });
-  el("msgText").value="";
-  el("preview").style.display="none";
+ show("messagesPanel");
+ el("messages").innerHTML="";
+ const {data}=await supabase.from("messages").select("*").order("created_at",{ascending:false});
+ data.forEach(m=>{
+  if(m.auteur!==user && !m.destinataires.includes(user) && role!=="admin") return;
+  const d=document.createElement("div");
+  d.className="message";
+  d.innerHTML=`<b>${m.auteur}</b>: ${m.texte}`;
+  if(m.image){const i=document.createElement("img");i.src=m.image;d.appendChild(i);}
+  el("messages").appendChild(d);
+ });
 };
 
 el("btnGestion").onclick=async()=>{
-  if(currentRole!=="admin")return;
-  show("gestionPanel");
-  const {data}=await supabase.from("comptes").select("*");
-  el("accountList").innerHTML="";
-  data.forEach(c=>{
-    const o=document.createElement("option");
-    o.value=c.id;
-    o.textContent=`${c.identifiant} [${c.role}]`;
-    el("accountList").appendChild(o);
-  });
+ if(role!=="admin")return;
+ show("gestionPanel");
+ loadAccounts();
 };
 
-el("btnVoirInfos").onclick=async()=>{
-  const {data}=await supabase.from("comptes")
-    .select("identifiant,motdepasse")
-    .eq("id",el("accountList").value)
-    .single();
-  alert(`ID: ${data.identifiant}\nMDP: ${data.motdepasse}`);
-};
+async function loadAccounts(){
+ el("accountList").innerHTML="";
+ const {data}=await supabase.from("comptes").select("*");
+ data.forEach(c=>{
+  const o=document.createElement("option");
+  o.value=c.id;
+  o.textContent=`${c.identifiant} [${c.role}] ${c.bloque?"(bloqué)":""}`;
+  el("accountList").appendChild(o);
+ });
+}
 
 el("btnCreate").onclick=async()=>{
-  await supabase.from("comptes").insert({
-    identifiant:el("newId").value,
-    motdepasse:el("newPwd").value,
-    role:el("newRole").value
-  });
+ await supabase.from("comptes").insert({
+  identifiant:el("newId").value,
+  motdepasse:el("newPwd").value,
+  role:el("newRole").value,
+  bloque:false
+ });
+ loadAccounts();
 };
 
 el("btnDelete").onclick=async()=>{
-  await supabase.from("comptes").delete().eq("id",el("accountList").value);
+ await supabase.from("comptes").delete().eq("id",el("accountList").value);
+ loadAccounts();
 };
 
 el("btnBlock").onclick=async()=>{
-  const {data}=await supabase.from("comptes").select("bloque")
-    .eq("id",el("accountList").value).single();
-  await supabase.from("comptes")
-    .update({bloque:!data.bloque})
-    .eq("id",el("accountList").value);
+ const {data}=await supabase.from("comptes").select("bloque").eq("id",el("accountList").value).single();
+ await supabase.from("comptes").update({bloque:!data.bloque}).eq("id",el("accountList").value);
+ loadAccounts();
+};
+
+el("btnVoir").onclick=async()=>{
+ const {data}=await supabase.from("comptes")
+ .select("identifiant,motdepasse")
+ .eq("id",el("accountList").value)
+ .single();
+ alert(`ID: ${data.identifiant}\nMDP: ${data.motdepasse}`);
+};
+
+el("btnEnvoi").onclick=async()=>{
+ show("envoiPanel");
+ el("destList").innerHTML="";
+ const {data}=await supabase.from("comptes").select("identifiant,bloque");
+ data.forEach(c=>{
+  if(c.bloque)return;
+  const l=document.createElement("label");
+  l.innerHTML=`<input type="checkbox" value="${c.identifiant}"> ${c.identifiant}`;
+  el("destList").appendChild(l);
+ });
+};
+
+el("btnSend").onclick=async()=>{
+ const dest=[...el("destList").querySelectorAll("input:checked")].map(c=>c.value);
+ if(dest.length===0)return;
+ await supabase.from("messages").insert({
+  auteur:user,
+  texte:el("msgText").value,
+  image:el("preview").src||null,
+  destinataires:dest
+ });
+ el("msgText").value="";
 };
 
 document.querySelectorAll(".btnBack").forEach(b=>b.onclick=()=>show("portalPanel"));
 </script>
 </body>
 </html>
-
