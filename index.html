@@ -103,20 +103,20 @@ small.muted{color:#8f8}
 
 <!-- Choix -->
 <div id="choicePanel" class="row">
-  <button class="spyBtn" id="btnChooseAdmin">🔐 Admin</button>
+  <button class="spyBtn" id="btnChooseAdmin">🔐 Admin<FONT="#ff0606"></button>
   <button class="spyBtn" id="btnChooseUser">👤 Utilisateur</button>
 </div>
 
 <!-- Login -->
 <div id="loginPanel" class="hidden">
   <h2 id="loginTitle"></h2>
-  <input id="loginId" placeholder="Identifiant">
-  <input id="loginPwd" type="password" placeholder="Mot de passe">
+  <input id="loginId" placeholder="Identifiant<FONT="#ff0606">">
+  <input id="loginPwd" type="password" placeholder="Mot de passe<FONT="#ff0606">">
   <p id="captchaQuestion"></p>
   <input id="captchaAnswer" placeholder="CAPTCHA">
-  <button class="spyBtn" id="btnLogin">Connexion</button>
+  <button class="spyBtn" id="btnLogin">Connexion<FONT="#ff0606"></button>
   <p id="loginError"></p>
-  <button class="spyBtn" id="btnBackLogin">⬅ Retour</button>
+  <button class="spyBtn" id="btnBackLogin">⬅ Retour<FONT="#ff0606"></button>
 </div>
 
 <!-- Portail -->
@@ -127,29 +127,29 @@ small.muted{color:#8f8}
     <small id="userRole" class="muted"></small>
   </p>
   <div class="row">
-    <button class="spyBtn" id="btnMessages">📥 Messages</button>
-    <button class="spyBtn" id="btnGestion">🔐 Comptes</button>
-    <button class="spyBtn" id="btnEnvoi">📤 Envoyer</button>
-    <button class="spyBtn" id="btnLogout">🚪 Quitter</button>
+    <button class="spyBtn" id="btnMessages">📥 Messages<FONT="#ff0606"></button>
+    <button class="spyBtn" id="btnGestion">🔐 Comptes<FONT="#ff0606"></button>
+    <button class="spyBtn" id="btnEnvoi">📤 Envoyer<FONT="#ff0606"></button>
+    <button class="spyBtn" id="btnLogout">🚪 Quitter<FONT="#ff0606"></button>
   </div>
 </div>
 
 <!-- Messages -->
 <div id="messagesPanel" class="hidden">
-  <h2>📥 Messages</h2>
+  <h2>📥 Messages<FONT="#ff0606"></h2>
   <div id="messages"></div>
-  <button class="spyBtn btnBack">⬅ Retour</button>
+  <button class="spyBtn btnBack">⬅ Retour<FONT="#ff0606"></button>
 </div>
 
 <!-- Gestion -->
 <div id="gestionPanel" class="hidden">
-  <h2>🔐 Gestion des comptes</h2>
+  <h2>🔐 Gestion des comptes<FONT="#ff0606"></h2>
 
   <input id="newId" placeholder="Identifiant">
   <input id="newPwd" placeholder="Mot de passe">
   <select id="newRole">
-    <option value="user">Utilisateur</option>
-    <option value="admin">Admin</option>
+    <option value="user">Utilisateur<FONT="#ff0606"></option>
+    <option value="admin">Admin<FONT="#ff0606"></option>
   </select>
   <button class="spyBtn" id="btnCreate">Créer</button>
 
@@ -157,27 +157,27 @@ small.muted{color:#8f8}
 
   <select id="accountList" size="6" style="min-width:220px"></select>
   <br>
-  <button class="spyBtn" id="btnVoir">👁 Voir ID/MDP</button>
-  <button class="spyBtn" id="btnBlock">Bloquer / Débloquer</button>
-  <button class="spyBtn" id="btnDelete">Supprimer</button>
+  <button class="spyBtn" id="btnVoir">👁 Voir ID/MDP<FONT="#ff0606"></button>
+  <button class="spyBtn" id="btnBlock">Bloquer / Débloquer<FONT="#ff0606"></button>
+  <button class="spyBtn" id="btnDelete">Supprimer<FONT="#ff0606"></button>
 
   <br>
-  <button class="spyBtn btnBack">⬅ Retour</button>
+  <button class="spyBtn btnBack">⬅ Retour<FONT="#ff0606"></button>
 </div>
 
 <!-- Envoi -->
 <div id="envoiPanel" class="hidden">
-  <h2>📤 Envoyer</h2>
-  <textarea id="msgText" rows="4" placeholder="Message"></textarea>
+  <h2>📤 Envoyer<FONT="#ff0606"></h2>
+  <textarea id="msgText" rows="4" placeholder="Message<FONT="#ff0606">"></textarea>
 
   <div id="destList" style="border:1px solid #0f0;padding:8px;max-height:150px;overflow:auto"></div>
 
   <input type="file" id="imageInput" accept="image/*">
   <img id="preview" style="display:none">
 
-  <button class="spyBtn" id="btnSend">Envoyer</button>
+  <button class="spyBtn" id="btnSend">Envoyer<FONT="#ff0606"></button>
   <p id="sendStatus"></p>
-  <button class="spyBtn btnBack">⬅ Retour</button>
+  <button class="spyBtn btnBack">⬅ Retour<FONT="#ff0606"></button>
 </div>
 
 <script type="module">
@@ -319,6 +319,7 @@ document.querySelectorAll(".btnBack").forEach(b=>b.onclick=()=>show("portalPanel
 </script>
 </body>
 </html>
+
 
 
 
