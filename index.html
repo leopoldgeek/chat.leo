@@ -26,79 +26,10 @@ button.spyBtn:hover{background:#0f0;color:#000}
 img{max-width:100%;margin-top:6px;border:1px solid #0f0}
 #messagesPanel{max-height:65vh;overflow:auto;padding:10px;border:1px solid #0f0}
 small.muted{color:#8f8}
-  /* ===== BACKGROUND ESPION ===== */
-
-#spy-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-/* Grille radar */
-.grid {
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  background:
-    linear-gradient(#0f02 1px, transparent 1px),
-    linear-gradient(90deg, #0f02 1px, transparent 1px);
-  background-size: 40px 40px;
-  animation: gridMove 20s linear infinite;
-}
-
-@keyframes gridMove {
-  from { transform: translate(0,0); }
-  to   { transform: translate(-40px,-40px); }
-}
-
-/* Ligne de scan */
-.scanline {
-  position: absolute;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(to right, transparent, #0f0, transparent);
-  top: 0;
-  animation: scan 6s linear infinite;
-  opacity: 0.6;
-}
-
-@keyframes scan {
-  0% { top: 0; }
-  100% { top: 100%; }
-}
-
-/* Pluie de caractères */
-.matrix {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      rgba(0,255,0,0.08) 0px,
-      rgba(247, 12, 12, 0.08) 1px,
-      transparent 2px,
-      transparent 6px
-    );
-  animation: matrixFlicker 0.15s infinite alternate;
-}
-
-@keyframes matrixFlicker {
-  from { opacity: 0.25; }
-  to   { opacity: 0.4; }
-}
-
 </style>
 </head>
 
 <body>
-  <div id="spy-bg">
-  <div class="grid"></div>
-  <div class="scanline"></div>
-  <div class="matrix"></div>
-</div>
 <h1>🕵️ Espion Supabase</h1>
 
 <!-- Choix -->
@@ -165,18 +96,19 @@ small.muted{color:#8f8}
   <button class="spyBtn btnBack">⬅ Retour</button>
 </div>
 
-<!-- Envoi -->
-<div id="envoiPanel" class="hidden">
-  <h2>📤 Envoyer</h2>
-  <textarea id="msgText" rows="4" placeholder="Message"></textarea>
+<!-- Envoi de fichier -->
+<div id="fileSendPanel" class="hidden">
+  <h2>📤 Envoyer un fichier</h2>
+  <input type="file" id="fileInput">
+  <textarea id="fileMsgText" rows="2" placeholder="Message (optionnel)"></textarea>
 
-  <div id="destList" style="border:1px solid #0f0;padding:8px;max-height:150px;overflow:auto"></div>
+  <div id="fileDestList" style="border:1px solid #0f0;padding:8px;max-height:150px;overflow:auto"></div>
 
-  <input type="file" id="imageInput" accept="image/*">
-  <img id="preview" style="display:none">
+  <label><input type="checkbox" id="filePasswordCheck"> Ajouter un mot de passe</label>
+  <input type="password" id="filePassword" class="hidden" placeholder="Mot de passe">
 
-  <button class="spyBtn" id="btnSend">Envoyer</button>
-  <p id="sendStatus"></p>
+  <button class="spyBtn" id="btnFileSend">Envoyer</button>
+  <p id="fileSendStatus"></p>
   <button class="spyBtn btnBack">⬅ Retour</button>
 </div>
 
@@ -184,140 +116,412 @@ small.muted{color:#8f8}
 import { createClient } from "https://esm.sh/@supabase/supabase-js";
 
 const supabase = createClient(
-  "https://vuymduxdvemtcbbzdqml.supabase.co",
-  "sb_publishable_6jCj8B1gHh5v6teJe-zy0g_rf1ijiYJ"
+  "https://tnezvnvkkgraunxfhree.supabase.co",
+  "sb_publishable_k-YRTfuLkaMUvBQfQNToRQ_aLXyCo-O"
 );
 
-const el=id=>document.getElementById(id);
-const show=id=>{
- ["choicePanel","loginPanel","portalPanel","messagesPanel","gestionPanel","envoiPanel"]
- .forEach(p=>el(p).classList.add("hidden"));
- el(id).classList.remove("hidden");
+const el = id => document.getElementById(id);
+const show = id => {
+  ["choicePanel", "loginPanel", "portalPanel", "messagesPanel", "gestionPanel", "fileSendPanel"]
+    .forEach(p => el(p).classList.add("hidden"));
+  el(id).classList.remove("hidden");
 };
 
-let user=null, role=null, roleChoice=null, a=0,b=0;
+let user = null, role = null, roleChoice = null, a = 0, b = 0;
 
-function captcha(){
- a=Math.floor(Math.random()*10)+1;
- b=Math.floor(Math.random()*10)+1;
- el("captchaQuestion").textContent=`${a} + ${b} = ?`;
+function captcha() {
+  a = Math.floor(Math.random() * 10) + 1;
+  b = Math.floor(Math.random() * 10) + 1;
+  el("captchaQuestion").textContent = `${a} + ${b} = ?`;
 }
 
-el("btnChooseAdmin").onclick=()=>{roleChoice="admin";el("loginTitle").textContent="Connexion Admin";captcha();show("loginPanel")};
-el("btnChooseUser").onclick=()=>{roleChoice="user";el("loginTitle").textContent="Connexion User";captcha();show("loginPanel")};
-el("btnBackLogin").onclick=()=>show("choicePanel");
+el("btnChooseAdmin").onclick = () => {
+  roleChoice = "admin";
+  el("loginTitle").textContent = "Connexion Admin";
+  captcha();
+  show("loginPanel");
+};
+el("btnChooseUser").onclick = () => {
+  roleChoice = "user";
+  el("loginTitle").textContent = "Connexion User";
+  captcha();
+  show("loginPanel");
+};
+el("btnBackLogin").onclick = () => show("choicePanel");
 
-el("btnLogin").onclick=async()=>{
- if(parseInt(el("captchaAnswer").value)!==(a+b)) return captcha();
+el("btnLogin").onclick = async () => {
+  if (parseInt(el("captchaAnswer").value) !== (a + b)) return captcha();
 
- const {data,error}=await supabase.from("comptes")
- .select("*")
- .eq("identifiant",el("loginId").value)
- .eq("motdepasse",el("loginPwd").value)
- .eq("bloque",false)
- .single();
+  const { data, error } = await supabase.from("comptes")
+    .select("*")
+    .eq("identifiant", el("loginId").value)
+    .eq("motdepasse", el("loginPwd").value)
+    .eq("bloque", false)
+    .single();
 
- if(error||!data|| (roleChoice==="admin"&&data.role!=="admin")){
-   el("loginError").textContent="Accès refusé";
-   return;
- }
+  if (error || !data || (roleChoice === "admin" && data.role !== "admin")) {
+    el("loginError").textContent = "Accès refusé";
+    return;
+  }
 
- user=data.identifiant;
- role=data.role;
- el("userName").textContent=user;
- el("userRole").textContent=`(${role})`;
- show("portalPanel");
+  user = data.identifiant;
+  role = data.role;
+  el("userName").textContent = user;
+  el("userRole").textContent = `(${role})`;
+  show("portalPanel");
 };
 
-el("btnLogout").onclick=()=>{user=null;role=null;show("choicePanel")};
-
-el("btnMessages").onclick=async()=>{
- show("messagesPanel");
- el("messages").innerHTML="";
- const {data}=await supabase.from("messages").select("*").order("created_at",{ascending:false});
- data.forEach(m=>{
-  if(m.auteur!==user && !m.destinataires.includes(user) && role!=="admin") return;
-  const d=document.createElement("div");
-  d.className="message";
-  d.innerHTML=`<b>${m.auteur}</b>: ${m.texte}`;
-  if(m.image){const i=document.createElement("img");i.src=m.image;d.appendChild(i);}
-  el("messages").appendChild(d);
- });
+el("btnLogout").onclick = () => {
+  user = null;
+  role = null;
+  show("choicePanel");
 };
 
-el("btnGestion").onclick=async()=>{
- if(role!=="admin")return;
- show("gestionPanel");
- loadAccounts();
+el("btnMessages").onclick = async () => {
+  show("messagesPanel");
+  el("messages").innerHTML = "";
+  const { data } = await supabase.from("messages").select("*").order("created_at", { ascending: false });
+
+  data.forEach(m => {
+    if (m.auteur !== user && !m.destinataires.includes(user) && role !== "admin") return;
+
+    const d = document.createElement("div");
+    d.className = "message";
+    d.innerHTML = `<b>${m.auteur}</b>: ${m.texte}`;
+
+    if (m.fichier) {
+      const downloadBtn = document.createElement("button");
+      downloadBtn.textContent = "Télécharger";
+      downloadBtn.className = "spyBtn";
+      downloadBtn.onclick = () => {
+        if (m.fichier_password) {
+          const pwd = prompt("Entrez le mot de passe pour télécharger le fichier :");
+          if (pwd !== m.fichier_password) {
+            alert("Mot de passe incorrect.");
+            return;
+          }
+        }
+        window.open(m.fichier_url, "_blank");
+      };
+
+      d.innerHTML += `<br>📄 ${m.fichier}`;
+      d.appendChild(downloadBtn);
+    }
+
+    el("messages").appendChild(d);
+  });
 };
 
-async function loadAccounts(){
- el("accountList").innerHTML="";
- const {data}=await supabase.from("comptes").select("*");
- data.forEach(c=>{
-  const o=document.createElement("option");
-  o.value=c.id;
-  o.textContent=`${c.identifiant} [${c.role}] ${c.bloque?"(bloqué)":""}`;
-  el("accountList").appendChild(o);
- });
+el("btnEnvoi").onclick = async () => {
+  show("fileSendPanel");
+  el("fileDestList").innerHTML = "";
+  const { data } = await supabase.from("comptes").select("identifiant,bloque");
+
+  data.forEach(c => {
+    if (c.bloque) return;
+    const l = document.createElement("label");
+    l.innerHTML = `<input type="checkbox" value="${c.identifiant}"> ${c.identifiant}`;
+    el("fileDestList").appendChild(l);
+  });
+};
+
+el("filePasswordCheck").onchange = () => {
+  el("filePassword").classList.toggle("hidden", !el("filePasswordCheck").checked);
+};
+
+el("btnFileSend").onclick = async () => {
+  const file = el("fileInput").files[0];
+  const dest = [...el("fileDestList").querySelectorAll("input:checked")].map(c => c.value);
+  const password = el("filePasswordCheck").checked ? el("filePassword").value : null;
+
+  if (!file || dest.length === 0) {
+    el("fileSendStatus").textContent = "Veuillez sélectionner un fichier et des destinataires.";
+    return;
+  }
+
+  const { data: uploadData, error: uploadError } = await supabase.storage.from("files").upload(`public/${file.name}`, file);
+
+  if (uploadError) {
+    el("fileSendStatus").textContent = "Erreur lors de l'envoi du fichier.";
+    return;
+  }
+
+  await supabase.from("messages").insert({
+    auteur: user,
+    texte: el("fileMsgText").value,
+    fichier: file.name,
+    fichier_url: `https://tnezvnvkkgraunxfhree.supabase.co/storage/v1/object/public/${uploadData.path}`,
+    fichier_password: password,
+    destinataires: dest
+  });
+
+  el("fileSendStatus").textContent = "Fichier envoyé avec succès !";
+  el("fileMsgText").value = "";
+  el("fileInput").value = "";
+};
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>chat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  background: url("https://i.ibb.co/zhhp9ZDw/Chat-GPT-Image-3-f-vr-2026-14-31-22.png") no-repeat center center fixed;
+  background-size: cover;
+}
+h1,h2{text-align:center;text-shadow:0 0 8px #0f0}
+input,textarea,button,select{
+  margin:6px;padding:10px;background:#001100;color:#0f0;
+  border:1px solid #0f0;border-radius:6px
+}
+button.spyBtn{
+  min-width:160px;padding:12px 20px;background:#001100;
+  color:#0f0;border:2px solid #0f0;border-radius:8px;cursor:pointer
+}
+button.spyBtn:hover{background:#0f0;color:#000}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hidden{display:none}
+.message{border-bottom:1px dashed #0f0;padding:8px}
+img{max-width:100%;margin-top:6px;border:1px solid #0f0}
+#messagesPanel{max-height:65vh;overflow:auto;padding:10px;border:1px solid #0f0}
+small.muted{color:#8f8}
+</style>
+</head>
+
+<body>
+<h1>🕵️ Espion Supabase</h1>
+
+<!-- Choix -->
+<div id="choicePanel" class="row">
+  <button class="spyBtn" id="btnChooseAdmin">🔐 Admin</button>
+  <button class="spyBtn" id="btnChooseUser">👤 Utilisateur</button>
+</div>
+
+<!-- Login -->
+<div id="loginPanel" class="hidden">
+  <h2 id="loginTitle"></h2>
+  <input id="loginId" placeholder="Identifiant">
+  <input id="loginPwd" type="password" placeholder="Mot de passe">
+  <p id="captchaQuestion"></p>
+  <input id="captchaAnswer" placeholder="CAPTCHA">
+  <button class="spyBtn" id="btnLogin">Connexion</button>
+  <p id="loginError"></p>
+  <button class="spyBtn" id="btnBackLogin">⬅ Retour</button>
+</div>
+
+<!-- Portail -->
+<div id="portalPanel" class="hidden">
+  <h2>Centre de contrôle</h2>
+  <p style="text-align:center">
+    Bienvenue <span id="userName"></span>
+    <small id="userRole" class="muted"></small>
+  </p>
+  <div class="row">
+    <button class="spyBtn" id="btnMessages">📥 Messages</button>
+    <button class="spyBtn" id="btnGestion">🔐 Comptes</button>
+    <button class="spyBtn" id="btnEnvoi">📤 Envoyer</button>
+    <button class="spyBtn" id="btnLogout">🚪 Quitter</button>
+  </div>
+</div>
+
+<!-- Messages -->
+<div id="messagesPanel" class="hidden">
+  <h2>📥 Messages</h2>
+  <div id="messages"></div>
+  <button class="spyBtn btnBack">⬅ Retour</button>
+</div>
+
+<!-- Gestion -->
+<div id="gestionPanel" class="hidden">
+  <h2>🔐 Gestion des comptes</h2>
+
+  <input id="newId" placeholder="Identifiant">
+  <input id="newPwd" placeholder="Mot de passe">
+  <select id="newRole">
+    <option value="user">Utilisateur</option>
+    <option value="admin">Admin</option>
+  </select>
+  <button class="spyBtn" id="btnCreate">Créer</button>
+
+  <hr>
+
+  <select id="accountList" size="6" style="min-width:220px"></select>
+  <br>
+  <button class="spyBtn" id="btnVoir">👁 Voir ID/MDP</button>
+  <button class="spyBtn" id="btnBlock">Bloquer / Débloquer</button>
+  <button class="spyBtn" id="btnDelete">Supprimer</button>
+
+  <br>
+  <button class="spyBtn btnBack">⬅ Retour</button>
+</div>
+
+<!-- Envoi de fichier -->
+<div id="fileSendPanel" class="hidden">
+  <h2>📤 Envoyer un fichier</h2>
+  <input type="file" id="fileInput">
+  <textarea id="fileMsgText" rows="2" placeholder="Message (optionnel)"></textarea>
+
+  <div id="fileDestList" style="border:1px solid #0f0;padding:8px;max-height:150px;overflow:auto"></div>
+
+  <label><input type="checkbox" id="filePasswordCheck"> Ajouter un mot de passe</label>
+  <input type="password" id="filePassword" class="hidden" placeholder="Mot de passe">
+
+  <button class="spyBtn" id="btnFileSend">Envoyer</button>
+  <p id="fileSendStatus"></p>
+  <button class="spyBtn btnBack">⬅ Retour</button>
+</div>
+
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js";
+
+const supabase = createClient(
+  "https://tnezvnvkkgraunxfhree.supabase.co",
+  "sb_publishable_k-YRTfuLkaMUvBQfQNToRQ_aLXyCo-O"
+);
+
+const el = id => document.getElementById(id);
+const show = id => {
+  ["choicePanel", "loginPanel", "portalPanel", "messagesPanel", "gestionPanel", "fileSendPanel"]
+    .forEach(p => el(p).classList.add("hidden"));
+  el(id).classList.remove("hidden");
+};
+
+let user = null, role = null, roleChoice = null, a = 0, b = 0;
+
+function captcha() {
+  a = Math.floor(Math.random() * 10) + 1;
+  b = Math.floor(Math.random() * 10) + 1;
+  el("captchaQuestion").textContent = `${a} + ${b} = ?`;
 }
 
-el("btnCreate").onclick=async()=>{
- await supabase.from("comptes").insert({
-  identifiant:el("newId").value,
-  motdepasse:el("newPwd").value,
-  role:el("newRole").value,
-  bloque:false
- });
- loadAccounts();
+el("btnChooseAdmin").onclick = () => {
+  roleChoice = "admin";
+  el("loginTitle").textContent = "Connexion Admin";
+  captcha();
+  show("loginPanel");
+};
+el("btnChooseUser").onclick = () => {
+  roleChoice = "user";
+  el("loginTitle").textContent = "Connexion User";
+  captcha();
+  show("loginPanel");
+};
+el("btnBackLogin").onclick = () => show("choicePanel");
+
+el("btnLogin").onclick = async () => {
+  if (parseInt(el("captchaAnswer").value) !== (a + b)) return captcha();
+
+  const { data, error } = await supabase.from("comptes")
+    .select("*")
+    .eq("identifiant", el("loginId").value)
+    .eq("motdepasse", el("loginPwd").value)
+    .eq("bloque", false)
+    .single();
+
+  if (error || !data || (roleChoice === "admin" && data.role !== "admin")) {
+    el("loginError").textContent = "Accès refusé";
+    return;
+  }
+
+  user = data.identifiant;
+  role = data.role;
+  el("userName").textContent = user;
+  el("userRole").textContent = `(${role})`;
+  show("portalPanel");
 };
 
-el("btnDelete").onclick=async()=>{
- await supabase.from("comptes").delete().eq("id",el("accountList").value);
- loadAccounts();
+el("btnLogout").onclick = () => {
+  user = null;
+  role = null;
+  show("choicePanel");
 };
 
-el("btnBlock").onclick=async()=>{
- const {data}=await supabase.from("comptes").select("bloque").eq("id",el("accountList").value).single();
- await supabase.from("comptes").update({bloque:!data.bloque}).eq("id",el("accountList").value);
- loadAccounts();
+el("btnMessages").onclick = async () => {
+  show("messagesPanel");
+  el("messages").innerHTML = "";
+  const { data } = await supabase.from("messages").select("*").order("created_at", { ascending: false });
+
+  data.forEach(m => {
+    if (m.auteur !== user && !m.destinataires.includes(user) && role !== "admin") return;
+
+    const d = document.createElement("div");
+    d.className = "message";
+    d.innerHTML = `<b>${m.auteur}</b>: ${m.texte}`;
+
+    if (m.fichier) {
+      const downloadBtn = document.createElement("button");
+      downloadBtn.textContent = "Télécharger";
+      downloadBtn.className = "spyBtn";
+      downloadBtn.onclick = () => {
+        if (m.fichier_password) {
+          const pwd = prompt("Entrez le mot de passe pour télécharger le fichier :");
+          if (pwd !== m.fichier_password) {
+            alert("Mot de passe incorrect.");
+            return;
+          }
+        }
+        window.open(m.fichier_url, "_blank");
+      };
+
+      d.innerHTML += `<br>📄 ${m.fichier}`;
+      d.appendChild(downloadBtn);
+    }
+
+    el("messages").appendChild(d);
+  });
 };
 
-el("btnVoir").onclick=async()=>{
- const {data}=await supabase.from("comptes")
- .select("identifiant,motdepasse")
- .eq("id",el("accountList").value)
- .single();
- alert(`ID: ${data.identifiant}\nMDP: ${data.motdepasse}`);
+el("btnEnvoi").onclick = async () => {
+  show("fileSendPanel");
+  el("fileDestList").innerHTML = "";
+  const { data } = await supabase.from("comptes").select("identifiant,bloque");
+
+  data.forEach(c => {
+    if (c.bloque) return;
+    const l = document.createElement("label");
+    l.innerHTML = `<input type="checkbox" value="${c.identifiant}"> ${c.identifiant}`;
+    el("fileDestList").appendChild(l);
+  });
 };
 
-el("btnEnvoi").onclick=async()=>{
- show("envoiPanel");
- el("destList").innerHTML="";
- const {data}=await supabase.from("comptes").select("identifiant,bloque");
- data.forEach(c=>{
-  if(c.bloque)return;
-  const l=document.createElement("label");
-  l.innerHTML=`<input type="checkbox" value="${c.identifiant}"> ${c.identifiant}`;
-  el("destList").appendChild(l);
- });
+el("filePasswordCheck").onchange = () => {
+  el("filePassword").classList.toggle("hidden", !el("filePasswordCheck").checked);
 };
 
-el("btnSend").onclick=async()=>{
- const dest=[...el("destList").querySelectorAll("input:checked")].map(c=>c.value);
- if(dest.length===0)return;
- await supabase.from("messages").insert({
-  auteur:user,
-  texte:el("msgText").value,
-  image:el("preview").src||null,
-  destinataires:dest
- });
- el("msgText").value="";
-};
+el("btnFileSend").onclick = async () => {
+  const file = el("fileInput").files[0];
+  const dest = [...el("fileDestList").querySelectorAll("input:checked")].map(c => c.value);
+  const password = el("filePasswordCheck").checked ? el("filePassword").value : null;
 
-document.querySelectorAll(".btnBack").forEach(b=>b.onclick=()=>show("portalPanel"));
+  if (!file || dest.length === 0) {
+    el("fileSendStatus").textContent = "Veuillez sélectionner un fichier et des destinataires.";
+    return;
+  }
+
+  const { data: uploadData, error: uploadError } = await supabase.storage.from("files").upload(`public/${file.name}`, file);
+
+  if (uploadError) {
+    el("fileSendStatus").textContent = "Erreur lors de l'envoi du fichier.";
+    return;
+  }
+
+  await supabase.from("messages").insert({
+    auteur: user,
+    texte: el("fileMsgText").value,
+    fichier: file.name,
+    fichier_url: `https://tnezvnvkkgraunxfhree.supabase.co/storage/v1/object/public/${uploadData.path}`,
+    fichier_password: password,
+    destinataires: dest
+  });
+
+  el("fileSendStatus").textContent = "Fichier envoyé avec succès !";
+  el("fileMsgText").value = "";
+  el("fileInput").value = "";
+};
 </script>
 </body>
 </html>
-
-
